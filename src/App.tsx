@@ -1,11 +1,11 @@
 import QuickFacts from "./components/QuickFacts/QuickFacts";
-import EntryRows from "./components/EntryRows/EntryRows";
+import EntriesTable from "./components/EntriesTable/EntriesTable";
 
 function App() {
   return (
     <>
       <QuickFacts />
-      <EntryRows />
+      <EntriesTable />
     </>
   );
 }

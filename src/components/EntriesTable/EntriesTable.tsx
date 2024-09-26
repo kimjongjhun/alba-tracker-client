@@ -9,15 +9,24 @@ import TableHead from "@mui/material/TableHead";
 import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
 
-const tableHeaders = ["Date", "Client", "Hours", "Location", "Actions"];
+import InputEntry from "../InputEntry/InputEntry";
 
-const RenderTableHeaders = () => {
-  return tableHeaders.map((header) => {
-    return <TableCell>{header}</TableCell>;
-  });
-};
+const EntriesTable = () => {
+  const tableHeaders = [
+    "Date",
+    "Client",
+    "Start",
+    "End",
+    "Location",
+    "Actions",
+  ];
 
-const EntryRows = () => {
+  const RenderTableHeaders = () => {
+    return tableHeaders.map((header) => {
+      return <TableCell key={header}>{header}</TableCell>;
+    });
+  };
+
   return (
     <Grid container spacing={1}>
       <Grid size={{ xs: 12, md: 8 }} offset={{ xs: 0, md: 2 }}>
@@ -29,6 +38,7 @@ const EntryRows = () => {
               </TableRow>
             </TableHead>
             <TableBody>
+              <InputEntry />
               <TableRow></TableRow>
             </TableBody>
             <TableFooter>
@@ -41,4 +51,4 @@ const EntryRows = () => {
   );
 };
 
-export default EntryRows;
+export default EntriesTable;
