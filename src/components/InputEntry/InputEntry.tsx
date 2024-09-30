@@ -27,6 +27,7 @@ const InputEntry = () => {
   const [activeClient, setActiveClient] = useState<number | "">("");
   const [locationsList, setLocationsList] = useState<LocationInfo[] | "">("");
   const [activeLocation, setActiveLocation] = useState<number | "">("");
+  const [saveDisabled, setSaveDisabled] = useState<boolean>(true);
 
   useEffect(() => {
     async function getClients() {
@@ -36,6 +37,10 @@ const InputEntry = () => {
 
     getClients();
   }, []);
+
+  useEffect(() => {
+    handleSaveDisabled();
+  }, [start, end, activeClient, activeLocation]);
 
   const handleDateChange = (newDate: Moment | null) => {
     setDate(newDate);
@@ -79,8 +84,20 @@ const InputEntry = () => {
     setActiveLocation(event.target.value as unknown as number);
   };
 
+  const handleSaveDisabled = () => {
+    let tempDisabled = false;
+
+    tempDisabled = [
+      end?.isBefore(start),
+      activeClient === "",
+      activeLocation === "",
+    ].includes(true);
+
+    setSaveDisabled(tempDisabled);
+  };
+
   const RenderMenuOptions = (optionsList: Client[] | LocationInfo[]) => {
-    return optionsList
+    const options = optionsList
       .filter((option) => option.active)
       .map((option: LocationInfo | Client, index: number) => {
         return (
@@ -89,6 +106,14 @@ const InputEntry = () => {
           </MenuItem>
         );
       });
+
+    options.unshift(
+      <MenuItem value={""}>
+        <em>None</em>
+      </MenuItem>
+    );
+
+    return options;
   };
 
   return (
@@ -147,7 +172,7 @@ const InputEntry = () => {
           <Button onClick={handleOnResetClick} color={"error"}>
             Reset
           </Button>
-          <Button disabled={end?.isBefore(start)}>Save</Button>
+          <Button disabled={saveDisabled}>Save</Button>
         </ButtonGroup>
       </TableCell>
     </TableRow>
