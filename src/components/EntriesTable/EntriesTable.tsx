@@ -6,7 +6,6 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableFooter from "@mui/material/TableFooter";
 import TableHead from "@mui/material/TableHead";
-import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
 
 import InputEntry from "../InputEntry/InputEntry";
@@ -17,6 +16,7 @@ const EntriesTable = () => {
     "Client",
     "Start",
     "End",
+    "Number of Hours",
     "Location",
     "Actions",
   ];

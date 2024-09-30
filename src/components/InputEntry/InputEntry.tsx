@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import Button from "@mui/material/Button";
 import ButtonGroup from "@mui/material/ButtonGroup";
@@ -7,10 +7,13 @@ import FormControl from "@mui/material/FormControl";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import MenuItem from "@mui/material/MenuItem";
 import moment, { Moment } from "moment";
+import { InputAdornment, OutlinedInput } from "@mui/material";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 import TableCell from "@mui/material/TableCell";
 import TableRow from "@mui/material/TableRow";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
+import getAllClients from "../../api/clients";
+import { Client, LocationInfo } from "../../types/clients";
 
 const today = moment();
 const startOfDay = moment().startOf("day").add(9, "hours");
@@ -20,6 +23,19 @@ const InputEntry = () => {
   const [date, setDate] = useState<Moment | null>(today);
   const [start, setStart] = useState<Moment | null>(startOfDay);
   const [end, setEnd] = useState<Moment | null>(endOfDay);
+  const [clientsList, setClientsList] = useState<Client[]>([]);
+  const [activeClient, setActiveClient] = useState<number | "">("");
+  const [locationsList, setLocationsList] = useState<LocationInfo[] | "">("");
+  const [activeLocation, setActiveLocation] = useState<number | "">("");
+
+  useEffect(() => {
+    async function getClients() {
+      const clients = await getAllClients();
+      setClientsList(clients);
+    }
+
+    getClients();
+  }, []);
 
   const handleDateChange = (newDate: Moment | null) => {
     setDate(newDate);
@@ -47,9 +63,33 @@ const InputEntry = () => {
     setDate(today);
     setStart(startOfDay);
     setEnd(endOfDay);
+    setActiveClient("");
+    setActiveLocation("");
   };
 
-  const handleClientChange = () => {};
+  const handleClientChange = (event: SelectChangeEvent) => {
+    setActiveLocation("");
+    const selectedClient = event.target.value as unknown as number;
+
+    setActiveClient(selectedClient);
+    setLocationsList(clientsList[selectedClient].locationInfo);
+  };
+
+  const handleLocationChange = (event: SelectChangeEvent) => {
+    setActiveLocation(event.target.value as unknown as number);
+  };
+
+  const RenderMenuOptions = (optionsList: Client[] | LocationInfo[]) => {
+    return optionsList
+      .filter((option) => option.active)
+      .map((option: LocationInfo | Client, index: number) => {
+        return (
+          <MenuItem key={`${option.name}-${index}`} value={index}>
+            {option.name}
+          </MenuItem>
+        );
+      });
+  };
 
   return (
     <TableRow>
@@ -61,13 +101,10 @@ const InputEntry = () => {
       <TableCell>
         <FormControl fullWidth>
           <Select
-            id="demo-simple-select"
-            value={10}
+            value={activeClient as unknown as string}
             onChange={handleClientChange}
           >
-            <MenuItem value={10}>Ten</MenuItem>
-            <MenuItem value={20}>Twenty</MenuItem>
-            <MenuItem value={30}>Thirty</MenuItem>
+            {clientsList && RenderMenuOptions(clientsList)}
           </Select>
         </FormControl>
       </TableCell>
@@ -90,16 +127,23 @@ const InputEntry = () => {
         </LocalizationProvider>
       </TableCell>
       <TableCell>
+        <OutlinedInput
+          endAdornment={<InputAdornment position={"end"}>hrs</InputAdornment>}
+          value={moment.duration(end?.diff(start)).asHours()}
+        />
+      </TableCell>
+      <TableCell>
         <FormControl fullWidth>
-          <Select id="demo-simple-select" value={10} onChange={() => {}}>
-            <MenuItem value={10}>Ten</MenuItem>
-            <MenuItem value={20}>Twenty</MenuItem>
-            <MenuItem value={30}>Thirty</MenuItem>
+          <Select
+            value={activeLocation as unknown as string}
+            onChange={handleLocationChange}
+          >
+            {locationsList && RenderMenuOptions(locationsList)}
           </Select>
         </FormControl>
       </TableCell>
       <TableCell>
-        <ButtonGroup variant={"outlined"}>
+        <ButtonGroup variant={"outlined"} size={"large"}>
           <Button onClick={handleOnResetClick} color={"error"}>
             Reset
           </Button>
