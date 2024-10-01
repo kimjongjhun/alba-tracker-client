@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, SetStateAction } from "react";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import Button from "@mui/material/Button";
 import ButtonGroup from "@mui/material/ButtonGroup";
@@ -15,11 +15,11 @@ import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import getAllClients from "../../api/clients";
 import { Client, LocationInfo } from "../../types/clients";
 
-const today = moment();
-const startOfDay = moment().startOf("day").add(9, "hours");
-const endOfDay = moment().startOf("day").add(9, "hours").add(8, "hours");
-
 const InputEntry = () => {
+  const today = moment();
+  const startOfDay = moment().startOf("day").add(9, "hours");
+  const endOfDay = moment().startOf("day").add(9, "hours").add(8, "hours");
+
   const [date, setDate] = useState<Moment | null>(today);
   const [start, setStart] = useState<Moment | null>(startOfDay);
   const [end, setEnd] = useState<Moment | null>(endOfDay);
@@ -41,6 +41,22 @@ const InputEntry = () => {
   useEffect(() => {
     handleSaveDisabled();
   }, [start, end, activeClient, activeLocation]);
+
+  useEffect(() => {
+    setStart(
+      startOfDay
+        ?.date(date?.date() as number)
+        ?.month(date?.month() as number)
+        ?.year(date?.year() as number) as SetStateAction<moment.Moment | null>
+    );
+
+    setEnd(
+      endOfDay
+        ?.date(date?.date() as number)
+        ?.month(date?.month() as number)
+        ?.year(date?.year() as number) as SetStateAction<moment.Moment | null>
+    );
+  }, [date]);
 
   const handleDateChange = (newDate: Moment | null) => {
     setDate(newDate);
