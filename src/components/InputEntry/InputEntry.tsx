@@ -15,6 +15,11 @@ import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import getAllClients from "../../api/clients";
 import { Client, LocationInfo } from "../../types/clients";
 import { postNewJob } from "../../api/jobs";
+import getAllLocations from "../../api/locations";
+import {
+  Location as LocationType,
+  Client as ClientType,
+} from "../../types/locations";
 
 const InputEntry = () => {
   const today = moment();
@@ -30,14 +35,22 @@ const InputEntry = () => {
   const [activeLocation, setActiveLocation] = useState<number | "">("");
   const [saveDisabled, setSaveDisabled] = useState<boolean>(true);
   const [duration, setDuration] = useState<number>(0);
+  const [fullLocationsList, setFullLocationsList] = useState<LocationType[]>(
+    []
+  );
 
   useEffect(() => {
     async function getClients() {
       const clients = await getAllClients();
       setClientsList(clients);
     }
+    async function getLocations() {
+      const locations = await getAllLocations();
+      setFullLocationsList(locations);
+    }
 
     getClients();
+    getLocations();
   }, []);
 
   useEffect(() => {
@@ -63,6 +76,23 @@ const InputEntry = () => {
   useEffect(() => {
     setDuration(moment.duration(end?.diff(start)).asHours());
   }, [start, end]);
+
+  useEffect(() => {
+    if (activeClient !== "") {
+      const filteredLocationsList = fullLocationsList.filter(
+        (location: LocationType) => {
+          return location.clients.some(
+            (client: ClientType) =>
+              client.id === clientsList[activeClient].id && client.active
+          );
+        }
+      );
+
+      setLocationsList(filteredLocationsList);
+    } else {
+      setLocationsList([]);
+    }
+  }, [activeClient]);
 
   const handleDateChange = (newDate: Moment | null) => {
     setDate(newDate);
@@ -116,7 +146,7 @@ const InputEntry = () => {
     const selectedClient = event.target.value as unknown as number;
 
     setActiveClient(selectedClient);
-    setLocationsList(clientsList[selectedClient].locationInfo);
+    setLocationsList(clientsList[selectedClient]?.locationInfo);
   };
 
   const handleLocationChange = (event: SelectChangeEvent) => {
