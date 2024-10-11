@@ -4,6 +4,7 @@ interface RateInfo {
 }
 
 interface LocationInfo {
+  id: string;
   name: string;
   address: string;
   active: boolean;

@@ -1,7 +1,6 @@
 import axios from "axios";
 import { Client } from "../types/clients";
-
-const url = "http://localhost:6173";
+import { url } from ".";
 
 const getAllClients = async (): Promise<Client[]> => {
   return await axios({

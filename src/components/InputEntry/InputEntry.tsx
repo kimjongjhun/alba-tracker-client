@@ -14,6 +14,7 @@ import TableRow from "@mui/material/TableRow";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import getAllClients from "../../api/clients";
 import { Client, LocationInfo } from "../../types/clients";
+import { postNewJob } from "../../api/jobs";
 
 const InputEntry = () => {
   const today = moment();
@@ -25,9 +26,10 @@ const InputEntry = () => {
   const [end, setEnd] = useState<Moment | null>(endOfDay);
   const [clientsList, setClientsList] = useState<Client[]>([]);
   const [activeClient, setActiveClient] = useState<number | "">("");
-  const [locationsList, setLocationsList] = useState<LocationInfo[] | "">("");
+  const [locationsList, setLocationsList] = useState<LocationInfo[]>([]);
   const [activeLocation, setActiveLocation] = useState<number | "">("");
   const [saveDisabled, setSaveDisabled] = useState<boolean>(true);
+  const [duration, setDuration] = useState<number>(0);
 
   useEffect(() => {
     async function getClients() {
@@ -58,6 +60,10 @@ const InputEntry = () => {
     );
   }, [date]);
 
+  useEffect(() => {
+    setDuration(moment.duration(end?.diff(start)).asHours());
+  }, [start, end]);
+
   const handleDateChange = (newDate: Moment | null) => {
     setDate(newDate);
   };
@@ -86,6 +92,23 @@ const InputEntry = () => {
     setEnd(endOfDay);
     setActiveClient("");
     setActiveLocation("");
+  };
+
+  const handleSaveClick = () => {
+    const activeClientObject = clientsList[activeClient as number];
+    const activeLocationObject = locationsList[activeLocation as number];
+
+    postNewJob({
+      date,
+      start,
+      end,
+      duration,
+      client: { id: activeClientObject.id, name: activeClientObject.name },
+      location: {
+        id: activeLocationObject.id,
+        name: activeLocationObject.name,
+      },
+    });
   };
 
   const handleClientChange = (event: SelectChangeEvent) => {
@@ -170,7 +193,7 @@ const InputEntry = () => {
       <TableCell>
         <OutlinedInput
           endAdornment={<InputAdornment position={"end"}>hrs</InputAdornment>}
-          value={moment.duration(end?.diff(start)).asHours()}
+          value={duration}
         />
       </TableCell>
       <TableCell>
@@ -188,7 +211,9 @@ const InputEntry = () => {
           <Button onClick={handleOnResetClick} color={"error"}>
             Reset
           </Button>
-          <Button disabled={saveDisabled}>Save</Button>
+          <Button disabled={saveDisabled} onClick={handleSaveClick}>
+            Save
+          </Button>
         </ButtonGroup>
       </TableCell>
     </TableRow>
